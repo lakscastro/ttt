@@ -86,6 +86,7 @@ class Clickable extends HookWidget {
       onPointerCancel: byOnPointerCancel,
       onPointerUp: byOnPointerUp,
       child: Container(
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           color: disabled
               ? Colors.transparent

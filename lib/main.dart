@@ -68,19 +68,21 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: k5dp.padding(),
+        padding: k20dp.padding(),
         child: Center(
           child: ListView(
             shrinkWrap: true,
             children: [
               const Divider(color: Colors.transparent),
               const Divider(color: Colors.transparent),
-              const Text(
-                'TIC\nTAC\nTOE\n',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: k20dp,
-                  fontFamily: 'Crackman',
+              const Center(
+                child: Text(
+                  'TIC\nTAC\nTOE\n',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: k10dp * 3,
+                    fontFamily: 'Crackman',
+                  ),
                 ),
               ),
               const MenuButton(
@@ -109,12 +111,7 @@ class _HomePageState extends State<HomePage> {
                     context.push((context) => const ListAvailableRoomsPage()),
               ),
               const Divider(color: Colors.transparent),
-              const MenuButton(
-                'Multiplayer (Soon!)',
-                color: Colors.grey,
-                disabled: true,
-              ),
-            ].map((e) => Center(child: e)).toList(),
+            ],
           ),
         ),
       ),

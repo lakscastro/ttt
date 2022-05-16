@@ -23,23 +23,25 @@ class ClickableText extends HookWidget {
       onHoverAnimationChanged: (value) => hoverAnimation.value = value,
       onTap: onTap,
       disabled: disabled,
-      child: AnimatedBuilder(
-        animation: hoverAnimation,
-        builder: (context, child) {
-          return Text(
-            text,
-            style: TextStyle(
-              fontSize: 26,
-              color: disabled
-                  ? kDisabledColor
-                  : Color.lerp(
-                      kDarkerColor,
-                      kHighContrast,
-                      hoverAnimation.value,
-                    ),
-            ),
-          );
-        },
+      child: Center(
+        child: AnimatedBuilder(
+          animation: hoverAnimation,
+          builder: (context, child) {
+            return Text(
+              text,
+              style: TextStyle(
+                fontSize: 26,
+                color: disabled
+                    ? kDisabledColor
+                    : Color.lerp(
+                        kDarkerColor,
+                        kHighContrast,
+                        hoverAnimation.value,
+                      ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
