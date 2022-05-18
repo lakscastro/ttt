@@ -15,4 +15,8 @@ extension Navigation on BuildContext {
   void pop<T extends Object>([T? result]) {
     return Navigator.pop<T>(this, result);
   }
+
+  Future<void> maybePop<T extends Object>([T? result]) {
+    return Navigator.maybePop<T>(this, result);
+  }
 }

@@ -19,30 +19,31 @@ class AppScaffold extends HookWidget {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: SafeArea(
-          child: Clickable(
-            padding: EdgeInsets.zero,
-            strokeWidth: 0.0,
-            onIsHoveredStateChanged: (hovered) => isHovered.value = hovered,
-            onTap: () => context.pop(),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: AspectRatio(
-                aspectRatio: k1p1,
-                child: Padding(
-                  padding: k20dp.symmetric(horizontal: true),
-                  child: AnimatedBuilder(
-                    animation: isHovered,
-                    builder: (context, child) {
-                      return Icon(
-                        Pixel.arrowleft,
-                        color: isHovered.value ? kHighContrast : kDarkerColor,
-                        size: k10dp,
-                      );
-                    },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Clickable(
+                    padding: k20dp.symmetric(horizontal: true),
+                    strokeWidth: 0.0,
+                    onIsHoveredStateChanged: (hovered) =>
+                        isHovered.value = hovered,
+                    onTap: () => context.maybePop(),
+                    child: AnimatedBuilder(
+                      animation: isHovered,
+                      builder: (context, child) {
+                        return Icon(
+                          Pixel.arrowleft,
+                          color: isHovered.value ? kHighContrast : kDarkerColor,
+                          size: k10dp,
+                        );
+                      },
+                    ),
                   ),
-                ),
+                ],
               ),
-            ),
+            ],
           ),
         ),
       ),
