@@ -306,7 +306,8 @@ class _GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
                                         cross: cross,
                                         value: animation.value,
                                         highlight: colorAnimation.value,
-                                        dot: _isMyTurnIndicator.value,
+                                        dot: _isMyTurnIndicator.value &&
+                                            !_match.isComplete,
                                         clip:
                                             cross || !isBoxAnimationComplete(),
                                       ),
@@ -486,13 +487,16 @@ class _ShapePainter extends CustomPainter {
     }
 
     if (dot) {
-      canvas.drawCircle(
-        Offset(size.width / 2, size.height / 2),
-        k2dp * (1 - value),
+      canvas.drawRect(
+        Rect.fromCenter(
+          center: Offset(size.width / 2, size.height / 2),
+          width: size.width / 2 * (1 - value),
+          height: size.height / 2 * (1 - value),
+        ),
         Paint()
-          ..color = Color.lerp(kDisabledColor, kHighContrast, highlight)!
-          ..style = PaintingStyle.fill
-          ..strokeWidth = k5dp,
+          ..color = kAlmostTransparent
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = k1dp,
       );
     }
   }

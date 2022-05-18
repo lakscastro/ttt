@@ -11,6 +11,7 @@ const kHighContrast = Colors.white;
 const kGreenColor = Color(0xFF1BB596);
 const kRedColor = Color(0xFFDF315A);
 const kDisabledColor = Color(0xFFCDCDCD);
+const kAlmostTransparent = Color(0xFFE6E6E6);
 
 const kBlackColor = Color(0xFF010101);
 const kAlmostBlackColor = Color(0xFF090909);
