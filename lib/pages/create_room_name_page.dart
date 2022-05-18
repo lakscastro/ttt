@@ -14,11 +14,13 @@ import '../widgets/clickable_text.dart';
 class CreateRoomNamePage extends HookWidget {
   const CreateRoomNamePage({Key? key}) : super(key: key);
 
+  int randomPort() => Random().nextInt(65535 - 1024) + 1024;
+
   @override
   Widget build(BuildContext context) {
     final defaultName = useState(generateDefaultRoomName());
     final controller = useTextEditingController(text: defaultName.value);
-    final hash = useState<int>(Random().nextInt(9999 - 1000) + 1000);
+    final port = useState<int>(randomPort());
 
     return AppScaffold(
       body: Padding(
@@ -38,7 +40,7 @@ class CreateRoomNamePage extends HookWidget {
                 ),
                 cursorColor: kDarkerColor,
                 decoration: InputDecoration(
-                  suffix: Text('#${hash.value}'),
+                  suffix: Text('#${port.value}'),
                   hintText: defaultName.value,
                   labelText: 'ROOM NAME',
                   labelStyle: TextStyle(
@@ -61,7 +63,8 @@ class CreateRoomNamePage extends HookWidget {
                       disabled: controller.text.length < 3,
                       onTap: () => context.push(
                         (context) => CreateRoomPage(
-                          roomName: '${controller.text}#${hash.value}',
+                          roomName: '${controller.text}#${port.value}',
+                          port: port.value,
                         ),
                       ),
                     );

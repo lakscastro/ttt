@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'pages/create_room_name_page.dart';
+import 'pages/game_board.dart';
 import 'pages/list_available_rooms_page.dart';
 import 'routing/navigator.dart';
 import 'theme/colors.dart';
@@ -68,11 +69,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: k20dp.padding(),
+        padding: k20dp.symmetric(horizontal: true),
         child: Center(
           child: ListView(
             shrinkWrap: true,
             children: [
+              const Divider(color: Colors.transparent),
               const Divider(color: Colors.transparent),
               const Divider(color: Colors.transparent),
               const Center(
@@ -110,6 +112,8 @@ class _HomePageState extends State<HomePage> {
                 onTap: () =>
                     context.push((context) => const ListAvailableRoomsPage()),
               ),
+              const Divider(color: Colors.transparent),
+              const Divider(color: Colors.transparent),
               const Divider(color: Colors.transparent),
             ],
           ),

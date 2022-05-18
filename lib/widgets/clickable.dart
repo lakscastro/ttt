@@ -8,25 +8,36 @@ class Clickable extends HookWidget {
   const Clickable({
     Key? key,
     this.onTap,
-    required this.child,
+    this.child,
     this.onIsHoveredStateChanged,
     this.onHoverAnimationChanged,
     this.disabled = false,
     this.strokeWidth = k2dp,
     this.padding = const EdgeInsets.symmetric(horizontal: k8dp),
+    this.builder,
   }) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
   final VoidCallback? onTap;
   final void Function(bool)? onIsHoveredStateChanged;
   final void Function(double)? onHoverAnimationChanged;
   final bool disabled;
   final double strokeWidth;
   final EdgeInsets padding;
+  final Widget Function(BuildContext, Widget?, bool)? builder;
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      child != null || builder != null,
+      '''You must provide either a child widget or a builder function''',
+    );
+
     final hoverController = useAnimationController(duration: k0ms);
+
+    bool isHovered() =>
+        hoverController.status == AnimationStatus.completed ||
+        hoverController.status == AnimationStatus.forward;
 
     useEffect(
       () {
@@ -103,7 +114,7 @@ class Clickable extends HookWidget {
                 ),
         ),
         padding: padding,
-        child: child,
+        child: builder?.call(context, child, isHovered()) ?? child,
       ),
     );
   }

@@ -20,3 +20,4 @@ linter:
     prefer_single_quotes: true
     prefer_relative_imports: true
     always_use_package_imports: false
+    avoid_catching_errors: false
