@@ -17,7 +17,7 @@
 
 ## NSD Package
 
-This project was built on top of [nsd](https://github.com/sebastianhaberey/nsd) [package](https://pub.dev/packages/nsd) maintaned by [@sebastianhaberey](https://github.com/sebastianhaberey) which I sincere thanks for the efforts to make this package accessible for everyone.
+This project was built on top of [nsd](https://github.com/sebastianhaberey/nsd) [package](https://pub.dev/packages/nsd) maintained by [@sebastianhaberey](https://github.com/sebastianhaberey) which I sincere thanks for the efforts to make this package accessible for everyone.
 
 ## How to install
 
