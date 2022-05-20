@@ -1,21 +1,10 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:nsd/nsd.dart';
 import 'package:pixelarticons/pixel.dart';
-import '../const/nsd.dart';
-import '../routing/navigator.dart';
-import '../store/game_match.dart';
 import '../theme/colors.dart';
 import '../theme/dp.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/clickable_text.dart';
 import '../widgets/loading_ellipsis.dart';
-import 'game_board.dart';
 
 class WaitRoom extends StatefulWidget {
   const WaitRoom({
@@ -148,8 +137,8 @@ class _WaitRoomState extends State<WaitRoom> {
                       ],
                     ),
                   ),
-                  const Divider(color: Colors.transparent),
-                  const Divider(color: Colors.transparent),
+                  const Divider(color: kTransparent),
+                  const Divider(color: kTransparent),
                   if (!widget.isClient)
                     Align(
                       alignment: Alignment.centerLeft,

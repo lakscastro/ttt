@@ -4,26 +4,29 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:nsd/nsd.dart';
-import 'package:pixelarticons/pixel.dart';
 import '../const/nsd.dart';
 import '../routing/navigator.dart';
 import '../store/game_match.dart';
-import '../theme/colors.dart';
+import '../store/user_profile.dart';
 import '../theme/dp.dart';
+import '../theme/typo.dart';
 import '../widgets/app_scaffold.dart';
-import '../widgets/clickable.dart';
 import '../widgets/loading_ellipsis.dart';
-import 'create_room_page.dart';
+import '../widgets/room_list_tile.dart';
 import 'game_board.dart';
 import 'wait_room.dart';
 
-class ListAvailableRoomsPage extends HookWidget {
-  const ListAvailableRoomsPage({Key? key}) : super(key: key);
+class AvailableRoomsPage extends HookWidget {
+  const AvailableRoomsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final isLoading = useState<bool>(true);
     final services = useState<List<Service>>([]);
+    final opponentName = useState<String?>(null);
+    final isMounted = useIsMounted();
+
+    var inGame = false;
 
     useEffect(
       () {
@@ -32,7 +35,7 @@ class ListAvailableRoomsPage extends HookWidget {
         void updateServices() => services.value = discovery!.services;
 
         Future<void> discoveryServices() async {
-          discovery = await startDiscovery(kServiceType);
+          discovery = await startDiscovery(kServiceType, autoResolve: false);
 
           discovery?.addListener(updateServices);
 
@@ -43,7 +46,9 @@ class ListAvailableRoomsPage extends HookWidget {
 
         discoveryServices();
 
-        return () {
+        return () async {
+          if (discovery != null) await stopDiscovery(discovery!);
+
           discovery?.removeListener(updateServices);
           discovery?.dispose();
         };
@@ -52,10 +57,12 @@ class ListAvailableRoomsPage extends HookWidget {
     );
 
     Widget buildLoadingIndicator() {
-      return const Center(
-        child: LoadingEllipsis(
+      return Container(
+        alignment: Alignment.center,
+        padding: k20dp.padding(),
+        child: const LoadingEllipsis(
           'Discovering services',
-          style: TextStyle(fontSize: k10dp),
+          style: kLoadingTxt,
         ),
       );
     }
@@ -68,10 +75,7 @@ class ListAvailableRoomsPage extends HookWidget {
             child: const LoadingEllipsis(
               'No results found, searching again',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: k10dp,
-                color: kDarkerColor,
-              ),
+              style: kLoadingTxt,
             ),
           ),
         );
@@ -82,7 +86,7 @@ class ListAvailableRoomsPage extends HookWidget {
           final service = services.value[index];
           var popOnExit = false;
 
-          return ServiceTile(
+          return RoomListTile(
             service: service,
             onTap: () async {
               try {
@@ -95,8 +99,6 @@ class ListAvailableRoomsPage extends HookWidget {
 
                 final broadcast = socket.asBroadcastStream();
 
-                print([target.host, target.port!]);
-
                 late StreamSubscription<String> sub;
 
                 sub = broadcast
@@ -108,14 +110,16 @@ class ListAvailableRoomsPage extends HookWidget {
                     } else if (message.startsWith('success')) {
                       final parts = message.split(':');
 
-                      socket.write('success:Client Player');
+                      socket.write('success:${userName.value}');
+
+                      opponentName.value = parts[1];
 
                       popOnExit = true;
 
                       await context.push(
                         (context) => WaitRoom(
                           isClient: true,
-                          players: [parts[1], 'Client Player'],
+                          players: [parts[1], userName.value],
                           port: '${socket.remotePort}',
                           roomName: target.name,
                           onNext: () => {},
@@ -132,11 +136,12 @@ class ListAvailableRoomsPage extends HookWidget {
                       final eventCode = parts[1];
 
                       if (eventCode == 'start') {
+                        inGame = true;
                         await context.push(
                           (context) => GameBoard(
                             iAmPlayingAs: Player.o,
-                            myself: 'Client Player',
-                            opponent: 'Server Player',
+                            myself: userName.value,
+                            opponent: opponentName.value!,
                             send: (updatedState) =>
                                 socket.write(encodeGameState(updatedState)),
                             server: broadcast.map(
@@ -146,11 +151,16 @@ class ListAvailableRoomsPage extends HookWidget {
                             ),
                           ),
                         );
+                        inGame = false;
+                        socket.write('event:left');
+                      } else if (eventCode == 'left') {
+                        if (inGame && isMounted()) {
+                          context.pop();
+                        }
                       }
                     }
                   },
                   onDone: () {
-                    print('CLIENT DONE!!');
                     if (popOnExit) context.pop();
                     sub.cancel();
                     socket.destroy();
@@ -169,65 +179,6 @@ class ListAvailableRoomsPage extends HookWidget {
     return AppScaffold(
       body:
           isLoading.value ? buildLoadingIndicator() : buildDiscoveredServices(),
-    );
-  }
-}
-
-class ServiceTile extends HookWidget {
-  const ServiceTile({
-    Key? key,
-    required this.service,
-    required this.onTap,
-  }) : super(key: key);
-
-  final Service service;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isHovered = useValueNotifier<bool>(false);
-
-    return Clickable(
-      onIsHoveredStateChanged: (hover) => isHovered.value = hover,
-      strokeWidth: 0.0,
-      child: ListTile(
-        onTap: onTap,
-        title: AnimatedBuilder(
-          animation: isHovered,
-          builder: (context, child) {
-            return Text.rich(
-              TextSpan(
-                children: [
-                  TextSpan(
-                    text: service.name!.split('#').first,
-                    style: TextStyle(
-                      color: isHovered.value ? kHighContrast : kDarkerColor,
-                      fontSize: k10dp,
-                    ),
-                  ),
-                  TextSpan(
-                    text: '#${service.name!.split('#').last}',
-                    style: const TextStyle(
-                      color: kDisabledColor,
-                      fontSize: k10dp,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        leading: AnimatedBuilder(
-          animation: isHovered,
-          builder: (context, child) {
-            return Icon(
-              Pixel.devices,
-              color: isHovered.value ? kHighContrast : kDarkerColor,
-              size: k5dp * 3,
-            );
-          },
-        ),
-      ),
     );
   }
 }

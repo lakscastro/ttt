@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../const/game.dart';
 
 enum Player { x, o }
@@ -14,39 +16,39 @@ Player? parsePlayer(String name) {
 
 extension PlayerExtension on Player {
   bool same(Player other) => this == other;
+  Player opposite() => this == Player.x ? Player.o : Player.x;
 }
 
+/// Represents a game match, to restart it, just create a new instance of this class
+///
+/// This class contains all game logic, if some player can move, which one has the turn, etc.
 class GameMatch {
-  GameMatch({
-    this.turnOf = Player.x,
-    List<List<Player?>>? board,
-    this.paused = false,
-  }) : board = board ?? _generateEmptyBoard();
+  GameMatch({this.turnOf = Player.x, List<List<Player?>>? board})
+      : board = board ?? _generateEmptyBoard();
 
+  // We can't use `static const` because it implies
+  // that all matches uses the same List instance.
+  //
+  // To notice that, it costs 2 hours of my life
   static List<List<Player?>> _generateEmptyBoard() {
     return [
-      _generateEmptyRow(),
-      _generateEmptyRow(),
-      _generateEmptyRow(),
+      for (var i = 0; i < 3; i++) _generateEmptyRow(),
     ];
   }
 
   static List<Player?> _generateEmptyRow() {
-    return <Player?>[null, null, null];
+    return <Player?>[for (var j = 0; j < 3; j++) null];
   }
 
   List<List<Player?>> board;
-  bool paused = false;
   Player turnOf;
 
-  bool get _hasWinner => _computeWinner() != null;
+  bool get hasWinner => _computeWinner() != null;
   bool get isComplete =>
-      _hasWinner || board.every((row) => row.every((cell) => cell != null));
+      hasWinner || board.every((row) => row.every((cell) => cell != null));
   Player? get winner => isComplete ? _computeWinner() : null;
-  bool get isDraw => isComplete && !_hasWinner;
-  List<List<int>>? get winnerCells => _hasWinner ? _computeWinnerCells() : null;
-
-  void pause() => paused = true;
+  bool get isDraw => isComplete && !hasWinner;
+  List<List<int>>? get winnerCells => hasWinner ? _computeWinnerCells() : null;
 
   Player? _computeWinner() {
     final match = _computeWinnerCells();
@@ -73,15 +75,45 @@ class GameMatch {
   }
 
   bool play(int row, int column, {required Player player}) {
-    if (paused || player != turnOf || isComplete) return false;
+    if (player != turnOf || isComplete) return false;
 
     if (board[row][column] != null) {
       return false;
     }
 
     board[row][column] = player;
-    turnOf = turnOf == Player.x ? Player.o : Player.x;
+    turnOf = turnOf.opposite();
 
     return true;
   }
+}
+
+/// Use it to encode data to send over sockets
+String encodeGameState(GameMatch match) {
+  final a = match.board
+      .map<List<String?>>((e) => e.map<String?>((e) => e?.name).toList())
+      .toList();
+  return jsonEncode(
+    <String, dynamic>{
+      'board': a,
+      'turnOf': match.turnOf.name,
+    },
+  );
+}
+
+/// Use it to decode data to received over sockets
+GameMatch decodeGameState(String match) {
+  final map = jsonDecode(match) as Map<String, dynamic>;
+
+  return GameMatch(
+    board: (map['board'] as List<dynamic>)
+        .map(
+          (e) => (e as List)
+              .map<Player?>((e) => e == null ? null : parsePlayer(e as String))
+              .toList(),
+        )
+        .cast<List<Player?>>()
+        .toList(),
+    turnOf: parsePlayer(map['turnOf'] as String)!,
+  );
 }

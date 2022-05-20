@@ -11,7 +11,9 @@ const k7dp = 14.0;
 const k8dp = 16.0;
 const k9dp = 18.0;
 const k10dp = 20.0;
+const k15dp = 30.0;
 const k20dp = 40.0;
+const k30dp = 60.0;
 const k50dp = 100.0;
 
 extension Util on double {

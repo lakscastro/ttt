@@ -1,18 +1,20 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:pixelarticons/pixel.dart';
-import 'package:ttt/theme/colors.dart';
-import 'package:ttt/theme/dp.dart';
-import 'package:ttt/widgets/clickable_text.dart';
 
+import '../alias/animation_controller.dart';
+import '../alias/list.dart';
 import '../store/game_match.dart';
+import '../theme/colors.dart';
+import '../theme/dp.dart';
 import '../theme/time.dart';
+import '../theme/typo.dart';
+import '../widgets/board_painter.dart';
 import '../widgets/clickable.dart';
+import '../widgets/clickable_text.dart';
+import '../widgets/const.dart';
 import '../widgets/loading_ellipsis.dart';
-import 'create_room_page.dart';
 
 class GameBoard extends StatefulWidget {
   const GameBoard({
@@ -37,94 +39,266 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
-  List<List<AnimationController>> createMultiAnimationControllers() {
-    return [
-      for (var i = 0; i < 3; i++)
-        [
-          for (var j = 0; j < 3; j++)
-            AnimationController(vsync: this, duration: k200ms)
-        ]
-    ];
+  List<List<AnimationController>> _createMultiAnimationControllers() {
+    return [3, 3].generateMatrix(
+      (_, __) => AnimationController(vsync: this, duration: k200ms),
+    );
   }
 
-  late List<List<AnimationController>> _boardColorAnimationState;
-  late List<List<AnimationController>> _boardAnimationState;
-  late AnimationController _boxPadding;
-  late ValueNotifier<bool> _isMyTurnIndicator;
+  late List<List<AnimationController>> _boardColorAnimationControllers;
+  late List<List<AnimationController>> _boardAnimationControllers;
+  late AnimationController _paddingViewSizeAnimationController;
+  late ValueNotifier<bool> _isMyTurnIndicatorNotifier;
   late GameMatch _match;
   late StreamSubscription<GameMatch> _subscription;
+
+  Listenable _animationsOf(int i, int j) => Listenable.merge(
+        [
+          _boardColorAnimationControllers[i][j],
+          _boardAnimationControllers[i][j],
+          _paddingViewSizeAnimationController,
+          _isMyTurnIndicatorNotifier,
+        ],
+      );
 
   @override
   void initState() {
     super.initState();
 
-    _boardColorAnimationState = createMultiAnimationControllers();
-    _boardAnimationState = createMultiAnimationControllers();
-    _boxPadding = AnimationController(vsync: this, duration: k200ms);
     _match = widget.initialMatch ?? GameMatch();
-    _isMyTurnIndicator = ValueNotifier(widget.iAmPlayingAs == _match.turnOf);
+
+    _boardColorAnimationControllers = _createMultiAnimationControllers();
+    _boardAnimationControllers = _createMultiAnimationControllers();
+    _paddingViewSizeAnimationController =
+        AnimationController(vsync: this, duration: k200ms);
+    _isMyTurnIndicatorNotifier =
+        ValueNotifier(widget.iAmPlayingAs == _match.turnOf);
+
     _subscription = widget.server.listen((updatedMatch) {
-      setState(() {
-        _match = updatedMatch;
-      });
-      _verifyGame();
+      setState(() => _match = updatedMatch);
+      _syncAnimationsWithCurrentMatchState();
     });
   }
 
-  void _verifyGame() {
-    _isMyTurnIndicator.value = widget.iAmPlayingAs == _match.turnOf;
+  void _syncAnimationsWithCurrentMatchState() {
+    _isMyTurnIndicatorNotifier.value = widget.iAmPlayingAs == _match.turnOf;
 
-    for (var i = 0; i < 3; i++) {
-      for (var j = 0; j < 3; j++) {
-        if (_match.board[i][j] == null) {
-          _boardAnimationState[i][j].reset();
-          _boardColorAnimationState[i][j].reset();
-          continue;
-        }
-
-        _boardAnimationState[i][j]
-            .forward(from: _boardAnimationState[i][j].value);
+    [3, 3].through((i, j) {
+      if (_match.board[i][j] == null) {
+        _boardAnimationControllers[i][j].reset();
+        _boardColorAnimationControllers[i][j].reset();
+      } else {
+        _boardAnimationControllers[i][j]
+            .forward(from: _boardAnimationControllers[i][j].value);
 
         if (_match.isComplete) {
           if (_match.isDraw) {
-            for (var i = 0; i < 3; i++) {
-              for (var j = 0; j < 3; j++) {
-                _boardColorAnimationState[i][j].forward(
-                  from: _boardColorAnimationState[i][j].value,
-                );
-              }
-            }
+            [3, 3].through((i, j) {
+              _boardColorAnimationControllers[i][j].forward(
+                from: _boardColorAnimationControllers[i][j].value,
+              );
+            });
           } else {
             for (final cell in _match.winnerCells!) {
-              _boardColorAnimationState[cell.first][cell.last].forward(
-                from: _boardColorAnimationState[cell.first][cell.last].value,
+              _boardColorAnimationControllers[cell.first][cell.last].forward(
+                from: _boardColorAnimationControllers[cell.first][cell.last]
+                    .value,
               );
             }
           }
         }
       }
-    }
+    });
+  }
+
+  void _byExitMatch() {
+    Navigator.maybePop(context);
   }
 
   @override
   void dispose() {
-    for (var i = 0; i < 3; i++) {
-      for (var j = 0; j < 3; j++) {
-        _boardColorAnimationState[i][j].dispose();
-        _boardAnimationState[i][j].dispose();
-      }
-    }
-    _boxPadding.dispose();
-    _isMyTurnIndicator.dispose();
+    [3, 3].through((i, j) {
+      _boardColorAnimationControllers[i][j].dispose();
+      _boardAnimationControllers[i][j].dispose();
+    });
+
+    _paddingViewSizeAnimationController.dispose();
+    _isMyTurnIndicatorNotifier.dispose();
 
     _subscription.cancel();
 
     super.dispose();
   }
 
-  bool isBoxAnimationComplete() =>
-      _boxPadding.status == AnimationStatus.completed ||
-      _boxPadding.status == AnimationStatus.forward;
+  double _applyCurve(AnimationController controller) {
+    final animation = CurvedAnimation(
+      parent: controller,
+      curve: Curves.easeInOut,
+    );
+
+    return animation.value;
+  }
+
+  void _byRestartMatch() {
+    _match = GameMatch();
+    setState(() {});
+    _syncAnimationsWithCurrentMatchState();
+    widget.send(_match);
+  }
+
+  void _byPlayAt(int i, int j) {
+    final isValidMove = _match.play(i, j, player: widget.iAmPlayingAs);
+
+    if (isValidMove) {
+      widget.send(_match);
+
+      _syncAnimationsWithCurrentMatchState();
+      setState(() {});
+    }
+  }
+
+  Widget _buildPlayerName(
+    String name, {
+    required bool winner,
+    required bool itsHisTurn,
+  }) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: winner ? kDarkerColor : kHighContrast,
+      ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: k20dp),
+          child: LoadingEllipsis(
+            name,
+            enabled: itsHisTurn,
+            style: kFullScreenTextFieldTxt.copyWith(
+              color: winner ? kHighContrast : kDarkerColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlayAgainButton() {
+    return Padding(
+      padding: const EdgeInsets.all(k20dp),
+      child: IgnorePointer(
+        ignoring: !_match.isComplete,
+        child: AnimatedOpacity(
+          duration: k500ms,
+          curve: Curves.easeInOut,
+          opacity: _match.isComplete ? 1 : 0,
+          child: ClickableText(
+            'Play Again',
+            onTap: _byRestartMatch,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBoardCell(int i, int j) {
+    return GestureDetector(
+      onTap: () => _byPlayAt(i, j),
+      child: AnimatedBuilder(
+        animation: _animationsOf(i, j),
+        builder: (context, child) {
+          final colorAnimation =
+              _applyCurve(_boardColorAnimationControllers[i][j]);
+
+          final cross = _match.board[i][j] == Player.x;
+
+          final padding =
+              (k10dp * _applyCurve(_paddingViewSizeAnimationController) + k2dp)
+                  .padding();
+
+          return ColoredBox(
+            color: Color.lerp(
+              kHighContrast,
+              kDarkerColor,
+              colorAnimation,
+            )!,
+            child: Padding(
+              padding: padding,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: BoardPainter(
+                    cross: cross,
+                    value: _applyCurve(_boardAnimationControllers[i][j]),
+                    highlight: colorAnimation,
+                    indicateTurn:
+                        _isMyTurnIndicatorNotifier.value && !_match.isComplete,
+                    clip: cross ||
+                        !_paddingViewSizeAnimationController
+                            .isForwardOrComplete(),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBackArrow() {
+    return Row(
+      children: [
+        Clickable(
+          padding: k20dp.symmetric(horizontal: true),
+          onTap: _byExitMatch,
+          strokeWidth: 0.0,
+          builder: (context, child, isHovered) {
+            return Icon(
+              Pixel.arrowleft,
+              color: isHovered ? kHighContrast : kDarkerColor,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _byTogglePaddingSizeView() {
+    if (_paddingViewSizeAnimationController.isForwardOrComplete()) {
+      _paddingViewSizeAnimationController.reverse(
+        from: _paddingViewSizeAnimationController.value,
+      );
+    } else {
+      _paddingViewSizeAnimationController.forward(
+        from: _paddingViewSizeAnimationController.value,
+      );
+    }
+  }
+
+  Widget _buildPaddingSizeViewButton() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        AnimatedBuilder(
+          animation: _paddingViewSizeAnimationController,
+          builder: (context, child) {
+            return Clickable(
+              padding: k20dp.symmetric(horizontal: true),
+              onTap: _byTogglePaddingSizeView,
+              strokeWidth: 0.0,
+              builder: (context, child, isHovered) {
+                return Icon(
+                  _paddingViewSizeAnimationController.isForwardOrComplete()
+                      ? Pixel.viewportnarrow
+                      : Pixel.viewportwide,
+                  color: isHovered ? kHighContrast : kDarkerColor,
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,58 +310,8 @@ class _GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  AnimatedBuilder(
-                    animation: _boxPadding,
-                    builder: (context, child) {
-                      return Clickable(
-                        padding: k20dp.symmetric(horizontal: true),
-                        onTap: () {
-                          Navigator.maybePop(context);
-                        },
-                        strokeWidth: 0.0,
-                        builder: (context, child, isHovered) {
-                          return Icon(
-                            Pixel.arrowleft,
-                            color: isHovered ? kHighContrast : kDarkerColor,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  AnimatedBuilder(
-                    animation: _boxPadding,
-                    builder: (context, child) {
-                      return Clickable(
-                        padding: k20dp.symmetric(horizontal: true),
-                        onTap: () {
-                          if (_boxPadding.status == AnimationStatus.completed ||
-                              _boxPadding.status == AnimationStatus.forward) {
-                            _boxPadding.reverse(from: _boxPadding.value);
-                          } else {
-                            _boxPadding.forward(from: _boxPadding.value);
-                          }
-                        },
-                        strokeWidth: 0.0,
-                        builder: (context, child, isHovered) {
-                          return Icon(
-                            !isBoxAnimationComplete()
-                                ? Pixel.viewportnarrow
-                                : Pixel.viewportwide,
-                            color: isHovered ? kHighContrast : kDarkerColor,
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
+              _buildBackArrow(),
+              _buildPaddingSizeViewButton(),
             ],
           ),
         ),
@@ -196,45 +320,14 @@ class _GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
         child: ListView(
           shrinkWrap: true,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: k10dp),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: _match.winner != null &&
-                          _match.winner != widget.iAmPlayingAs
-                      ? kDarkerColor
-                      : kHighContrast,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: k20dp),
-                    child: _match.turnOf != widget.iAmPlayingAs &&
-                            !_match.isComplete
-                        ? LoadingEllipsis(
-                            widget.opponent,
-                            style: TextStyle(
-                              fontSize: 26,
-                              color: _match.winner != null &&
-                                      _match.winner != widget.iAmPlayingAs
-                                  ? kHighContrast
-                                  : kDarkerColor,
-                            ),
-                          )
-                        : Text(
-                            widget.opponent,
-                            style: TextStyle(
-                              fontSize: 26,
-                              color: _match.winner != null &&
-                                      _match.winner != widget.iAmPlayingAs
-                                  ? kHighContrast
-                                  : kDarkerColor,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
+            _buildPlayerName(
+              widget.opponent,
+              winner: _match.hasWinner &&
+                  _match.winner == widget.iAmPlayingAs.opposite(),
+              itsHisTurn: !_match.isComplete &&
+                  _match.turnOf == widget.iAmPlayingAs.opposite(),
             ),
+            kTransparentDivider,
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: k20dp),
               child: DecoratedBox(
@@ -247,265 +340,24 @@ class _GameBoardState extends State<GameBoard> with TickerProviderStateMixin {
                     mainAxisSpacing: k5dp,
                   ),
                   shrinkWrap: true,
-                  children: [
-                    for (var i = 0; i < 3; i++)
-                      for (var j = 0; j < 3; j++)
-                        GestureDetector(
-                          onTap: () {
-                            if (_match.board[i][j] != null) {
-                              return;
-                            }
-
-                            if (_match.play(i, j,
-                                player: widget.iAmPlayingAs)) {
-                              widget.send(_match);
-                            }
-
-                            _verifyGame();
-                            setState(() {});
-                          },
-                          child: AnimatedBuilder(
-                            animation: Listenable.merge(
-                              [
-                                _boardColorAnimationState[i][j],
-                                _boardAnimationState[i][j],
-                                _boxPadding,
-                                _isMyTurnIndicator,
-                              ],
-                            ),
-                            builder: (context, child) {
-                              final boxPaddingAnimation = CurvedAnimation(
-                                parent: _boxPadding,
-                                curve: Curves.easeInOut,
-                              );
-
-                              final animation = CurvedAnimation(
-                                parent: _boardAnimationState[i][j],
-                                curve: Curves.easeInOut,
-                              );
-                              final colorAnimation = CurvedAnimation(
-                                parent: _boardColorAnimationState[i][j],
-                                curve: Curves.easeInOut,
-                              );
-
-                              final cross = _match.board[i][j] == Player.x;
-
-                              return ColoredBox(
-                                color: Color.lerp(
-                                  kHighContrast,
-                                  kDarkerColor,
-                                  colorAnimation.value,
-                                )!,
-                                child: Padding(
-                                  padding:
-                                      (k10dp * boxPaddingAnimation.value + k2dp)
-                                          .padding(),
-                                  child: RepaintBoundary(
-                                    child: CustomPaint(
-                                      painter: _ShapePainter(
-                                        cross: cross,
-                                        value: animation.value,
-                                        highlight: colorAnimation.value,
-                                        dot: _isMyTurnIndicator.value &&
-                                            !_match.isComplete,
-                                        clip:
-                                            cross || !isBoxAnimationComplete(),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                  ],
+                  children: [3, 3]
+                      .generateMatrix((i, j) => _buildBoardCell(i, j))
+                      .rflatten<Widget>()
+                      .toList(),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: k10dp),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: _match.winner == widget.iAmPlayingAs
-                      ? kDarkerColor
-                      : kHighContrast,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: k20dp),
-                  child:
-                      _match.turnOf == widget.iAmPlayingAs && !_match.isComplete
-                          ? LoadingEllipsis(
-                              widget.myself,
-                              style: TextStyle(
-                                fontSize: 26,
-                                color: _match.winner == widget.iAmPlayingAs
-                                    ? kHighContrast
-                                    : kDarkerColor,
-                              ),
-                            )
-                          : Text(
-                              widget.myself,
-                              style: TextStyle(
-                                fontSize: 26,
-                                color: _match.winner == widget.iAmPlayingAs
-                                    ? kHighContrast
-                                    : kDarkerColor,
-                              ),
-                            ),
-                ),
-              ),
+            kTransparentDivider,
+            _buildPlayerName(
+              widget.myself,
+              winner: _match.hasWinner && _match.winner == widget.iAmPlayingAs,
+              itsHisTurn:
+                  !_match.isComplete && _match.turnOf == widget.iAmPlayingAs,
             ),
-            Padding(
-              padding: const EdgeInsets.all(k20dp),
-              child: IgnorePointer(
-                ignoring: !_match.isComplete,
-                child: AnimatedOpacity(
-                  duration: k500ms,
-                  curve: Curves.easeInOut,
-                  opacity: _match.isComplete ? 1 : 0,
-                  child: ClickableText(
-                    'Play Again',
-                    onTap: () {
-                      _match = GameMatch();
-                      setState(() {});
-                      _verifyGame();
-                      widget.send(_match);
-                    },
-                  ),
-                ),
-              ),
-            ),
+            _buildPlayAgainButton(),
           ],
         ),
       ),
     );
   }
-}
-
-class _ShapePainter extends CustomPainter {
-  const _ShapePainter({
-    required this.cross,
-    required this.value,
-    required this.clip,
-    required this.highlight,
-    required this.dot,
-  });
-
-  final double value;
-  final bool clip;
-  final bool cross;
-  final double highlight;
-  final bool dot;
-
-  static const k3d = k6dp;
-
-  void _paintCross(Canvas canvas, Size size) {
-    if (clip) {
-      canvas.clipRect(
-        Rect.fromLTRB(
-          k5dp / 2,
-          k5dp / 2,
-          size.width - k5dp / 2,
-          size.height - k5dp / 2,
-        ),
-      );
-    }
-
-    final v = value * 2;
-
-    final start = min(v, 1);
-    final end = v - start;
-
-    final paint = Paint()
-      ..color = Color.lerp(kDarkerColor, kHighContrast, highlight)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = k5dp;
-
-    final shadow = Paint()
-      ..color = Color.lerp(kDisabledColor, Colors.transparent, highlight)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = k5dp;
-
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width * start, size.height * start)
-      ..moveTo(0, size.height)
-      ..lineTo(size.width * end, size.height - size.height * end);
-
-    canvas.translate(k3d, k3d);
-    canvas.drawPath(path, shadow);
-    canvas.translate(-k3d, -k3d);
-    canvas.drawPath(path, paint);
-  }
-
-  void _paintCircle(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Color.lerp(kDarkerColor, kHighContrast, highlight)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = k5dp;
-
-    final shadow = Paint()
-      ..color = Color.lerp(kDisabledColor, Colors.transparent, highlight)!
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = k5dp;
-
-    final path = Path()
-      ..addArc(
-        Rect.fromLTWH(
-          k5dp / 2,
-          k5dp / 2,
-          size.width - k5dp,
-          size.height - k5dp,
-        ),
-        0,
-        2 * pi * value,
-      );
-
-    canvas.save();
-    canvas.clipRRect(
-      RRect.fromLTRBR(
-        k5dp / 2,
-        k5dp / 2,
-        size.width - k5dp,
-        size.height - k5dp,
-        Radius.circular(size.width / 2 - k5dp),
-      ),
-    );
-    canvas.translate(k3d, k3d);
-    canvas.drawPath(path, shadow);
-    canvas.translate(-k3d, -k3d);
-    canvas.restore();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (cross) {
-      _paintCross(canvas, size);
-    } else {
-      _paintCircle(canvas, size);
-    }
-
-    if (dot) {
-      canvas.drawRect(
-        Rect.fromCenter(
-          center: Offset(size.width / 2, size.height / 2),
-          width: size.width / 2 * (1 - value),
-          height: size.height / 2 * (1 - value),
-        ),
-        Paint()
-          ..color = kAlmostTransparent
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = k1dp,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_ShapePainter oldDelegate) =>
-      oldDelegate.cross != cross ||
-      oldDelegate.value != value ||
-      oldDelegate.clip != clip ||
-      oldDelegate.highlight != highlight ||
-      oldDelegate.dot != dot;
 }
