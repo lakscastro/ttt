@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/dart-22272E?style=for-the-badge&logo=dart&logoColor=00CBB2">
 </p>
 
-<a href="#"><h4 align="center"><samp>Play It</samp></h4></a>
+<a href="https://github.com/lakscastro/ttt/releases"><h4 align="center"><samp>Play It</samp></h4></a>
 
 <br>
 
