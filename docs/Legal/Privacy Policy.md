@@ -1,6 +1,6 @@
 <h1>Privacy Policy for Tic Tac Toe</h1>
 
-<p>At Tic Tac Toe, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Tic Tac Toe and how we use it.</p>
+<p>At Tic Tac Toe, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded (if any) by Tic Tac Toe and how we use it.</p>
 
 <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us.</p>
 
