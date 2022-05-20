@@ -6,18 +6,15 @@ class MenuButton extends HookWidget {
   const MenuButton(
     this.text, {
     Key? key,
-    required this.color,
     this.onTap,
     this.disabled = false,
   }) : super(key: key);
 
   final String text;
-  final Color color;
   final VoidCallback? onTap;
   final bool disabled;
 
   @override
-  Widget build(BuildContext context) {
-    return ClickableText(text, onTap: onTap, disabled: disabled);
-  }
+  Widget build(BuildContext context) =>
+      ClickableText(text, onTap: onTap, disabled: disabled);
 }

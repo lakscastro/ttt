@@ -100,7 +100,7 @@ class Clickable extends HookWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: disabled
-              ? Colors.transparent
+              ? kTransparent
               : Color.lerp(
                   kDarkerColor,
                   kHighContrast,

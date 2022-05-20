@@ -1,4 +1,4 @@
-package io.lakscastro.ttt
+package io.lakscastro.tictac
 
 import io.flutter.embedding.android.FlutterActivity
 

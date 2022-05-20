@@ -13,9 +13,8 @@ class AppScaffold extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isHovered = useValueNotifier(false);
-
     return Scaffold(
+      body: body,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
         child: SafeArea(
@@ -27,19 +26,14 @@ class AppScaffold extends HookWidget {
                   Clickable(
                     padding: k20dp.symmetric(horizontal: true),
                     strokeWidth: 0.0,
-                    onIsHoveredStateChanged: (hovered) =>
-                        isHovered.value = hovered,
                     onTap: () => context.maybePop(),
-                    child: AnimatedBuilder(
-                      animation: isHovered,
-                      builder: (context, child) {
-                        return Icon(
-                          Pixel.arrowleft,
-                          color: isHovered.value ? kHighContrast : kDarkerColor,
-                          size: k10dp,
-                        );
-                      },
-                    ),
+                    builder: (context, child, isHovered) {
+                      return Icon(
+                        Pixel.arrowleft,
+                        color: isHovered ? kHighContrast : kDarkerColor,
+                        size: k10dp,
+                      );
+                    },
                   ),
                 ],
               ),
@@ -47,7 +41,6 @@ class AppScaffold extends HookWidget {
           ),
         ),
       ),
-      body: body,
     );
   }
 }

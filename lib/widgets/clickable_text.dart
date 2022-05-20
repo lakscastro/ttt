@@ -17,32 +17,24 @@ class ClickableText extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hoverAnimation = useValueNotifier<double>(0);
-
     return Clickable(
-      onHoverAnimationChanged: (value) => hoverAnimation.value = value,
       onTap: onTap,
       disabled: disabled,
-      child: Center(
-        child: AnimatedBuilder(
-          animation: hoverAnimation,
-          builder: (context, child) {
-            return Text(
-              text,
-              style: TextStyle(
-                fontSize: 26,
-                color: disabled
-                    ? kDisabledColor
-                    : Color.lerp(
-                        kDarkerColor,
-                        kHighContrast,
-                        hoverAnimation.value,
-                      ),
-              ),
-            );
-          },
-        ),
-      ),
+      builder: (context, child, isHovered) {
+        return Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 26,
+              color: disabled
+                  ? kDisabledColor
+                  : isHovered
+                      ? kHighContrast
+                      : kDarkerColor,
+            ),
+          ),
+        );
+      },
     );
   }
 }

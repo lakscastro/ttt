@@ -8,18 +8,20 @@ class LoadingEllipsis extends HookWidget {
     Key? key,
     this.style,
     this.textAlign,
+    this.dots = 5,
+    this.enabled = true,
   }) : super(key: key);
 
   final String text;
   final TextStyle? style;
   final TextAlign? textAlign;
+  final int dots;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
-    const kDots = 5;
-
     final controller = useAnimationController(duration: k2000ms);
-    final dots = '.' * ((useAnimation(controller) * kDots + 1) ~/ 1);
+    final ellipsis = '.' * ((useAnimation(controller) * dots + 1) ~/ 1);
 
     useEffect(
       () {
@@ -31,7 +33,7 @@ class LoadingEllipsis extends HookWidget {
     );
 
     return Text(
-      '$text$dots',
+      '$text${enabled ? ellipsis : ''}',
       style: style,
       textAlign: textAlign,
     );

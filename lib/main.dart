@@ -1,17 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import 'pages/available_rooms_page.dart';
 import 'pages/create_room_name_page.dart';
-import 'pages/game_board.dart';
-import 'pages/list_available_rooms_page.dart';
+import 'pages/edit_user_name.dart';
 import 'routing/navigator.dart';
+import 'store/user_profile.dart';
 import 'theme/colors.dart';
 import 'theme/dp.dart';
-import 'theme/time.dart';
 import 'theme/typo.dart';
+import 'widgets/const.dart';
 import 'widgets/menu_button.dart';
 import 'widgets/no_glow.dart';
 
-void main() {
+Future<void> _setupUserProfileStore() async {
+  userName = ValueNotifier(await getUserName());
+  var previousName = userName.value;
+
+  userName.addListener(() async {
+    if (userName.value != previousName) {
+      previousName = userName.value;
+      await setUserName(userName.value);
+    }
+  });
+}
+
+Future<void> setupDependencies() async {
+  await _setupUserProfileStore();
+}
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await setupDependencies();
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: kHighContrast,
@@ -40,7 +62,7 @@ class TicTacApp extends StatelessWidget {
       },
       title: 'Tic Tac Toe',
       theme: theme.copyWith(
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: kHighContrast,
         textTheme: theme.textTheme.apply(
           fontFamily: kFontFamily,
           bodyColor: kDarkerColor,
@@ -64,57 +86,36 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  void _byOpenCreateRoomPage() =>
+      context.push((context) => const CreateRoomNamePage());
+
+  void _byOpenServerListPage() =>
+      context.push((context) => const AvailableRoomsPage());
+
+  void _byOpenEditProfilePage() =>
+      context.push((context) => const EditUserName());
+
+  Widget _buildLogo() =>
+      const Center(child: Text('Tic\nTac\nToe\n', style: kLogoTxt));
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: kHighContrast,
       body: Padding(
         padding: k20dp.symmetric(horizontal: true),
         child: Center(
           child: ListView(
             shrinkWrap: true,
             children: [
-              const Divider(color: Colors.transparent),
-              const Divider(color: Colors.transparent),
-              const Divider(color: Colors.transparent),
-              const Center(
-                child: Text(
-                  'TIC\nTAC\nTOE\n',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: k10dp * 3,
-                    fontFamily: 'Crackman',
-                  ),
-                ),
-              ),
-              const MenuButton(
-                'Set your name',
-                color: Colors.grey,
-              ),
-              const Divider(color: Colors.transparent),
-              MenuButton(
-                'Create room',
-                color: Colors.grey,
-                onTap: () => Navigator.push(
-                  context,
-                  PageRouteBuilder(
-                    transitionDuration: k0ms,
-                    reverseTransitionDuration: k0ms,
-                    pageBuilder: (_, __, ___) => const CreateRoomNamePage(),
-                    transitionsBuilder: (_, animation, ___, child) => child,
-                  ),
-                ),
-              ),
-              const Divider(color: Colors.transparent),
-              MenuButton(
-                'Join room',
-                color: Colors.grey,
-                onTap: () =>
-                    context.push((context) => const ListAvailableRoomsPage()),
-              ),
-              const Divider(color: Colors.transparent),
-              const Divider(color: Colors.transparent),
-              const Divider(color: Colors.transparent),
+              ...kLargeDivider,
+              _buildLogo(),
+              MenuButton('Create room', onTap: _byOpenCreateRoomPage),
+              kTransparentDivider,
+              MenuButton('Join room', onTap: _byOpenServerListPage),
+              kTransparentDivider,
+              MenuButton('Set your name', onTap: _byOpenEditProfilePage),
+              ...kLargeDivider,
             ],
           ),
         ),
