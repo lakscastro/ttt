@@ -31,7 +31,7 @@ Take a look at [`releases`](https://github.com/lakscastro/ttt/releases)
 
 ## How to play
 
-**Requirements:** You'll need two devices or a friend and the game installed on both to in order to play.
+**Requirements:** You'll need two devices or a friend and the game installed on both in order to play.
 
 The first one needs to create a room (Click on <kbd>Create Room</kbd>) which will appear on the second device (Click on <kbd>Join Room</kbd>).
 
