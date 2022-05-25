@@ -2,9 +2,14 @@
   <img src="https://user-images.githubusercontent.com/51419598/169545112-c5ad7eb1-809d-488b-9113-ee270f2bb0c7.png">
 </p>
 <samp><h6 align="center">#game, #app, #android #tictactoe</h6></samp>
+
 <samp><h1 align="center">Tic Tac Toe</h1></samp>
 
 <h6 align="center"><samp>A Open Source Tic Tac Toe Game with Local Multiplayer</samp></h6>
+
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=io.lakscastro.ttt"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/flutter-22272E?&style=for-the-badge&logo=flutter&logoColor=65BFE7">
@@ -27,7 +32,9 @@ Take a look at [`releases`](https://github.com/lakscastro/ttt/releases)
 
 ### Play Store
 
-> Soon, if Google accept it.
+Available at [io.lakscastro.ttt](https://play.google.com/store/apps/details?id=io.lakscastro.ttt).
+
+<a href="https://play.google.com/store/apps/details?id=io.lakscastro.ttt&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
 
 ## How to play
 
