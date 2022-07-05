@@ -5,7 +5,7 @@
 
 <samp><h1 align="center">Tic Tac Toe</h1></samp>
 
-<h6 align="center"><samp>A Open Source Tic Tac Toe Game with Local Multiplayer.</samp></h6>
+<h6 align="center"><samp>A Open Source Tic Tac Toe Game with Local Multiplayer</samp></h6>
 
 <p align="center">
   <a href="https://play.google.com/store/apps/details?id=io.lakscastro.ttt"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
