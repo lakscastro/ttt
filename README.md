@@ -8,7 +8,7 @@
 <p align="center"><samp>A Open Source Tic Tac Toe Game with Local Multiplayer</samp></p>
 
 <p align="center">
-  <a href="https://play.google.com/store/apps/details?id=io.lakscastro.ttt"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
+  <a href="https://play.google.com/store/apps/details?id=io.alexrintt.ttt"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
 </p>
 
 <p align="center">
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/dart-22272E?style=for-the-badge&logo=dart&logoColor=00CBB2">
 </p>
 
-<a href="https://github.com/lakscastro/ttt/releases"><h4 align="center"><samp>Play It</samp></h4></a>
+<a href="https://github.com/alexrintt/ttt/releases"><h4 align="center"><samp>Play It</samp></h4></a>
 
 <br>
 
@@ -28,13 +28,13 @@ This project was built on top of [nsd](https://github.com/sebastianhaberey/nsd) 
 
 ### Releases Tab
 
-Take a look at [`releases`](https://github.com/lakscastro/ttt/releases)
+Take a look at [`releases`](https://github.com/alexrintt/ttt/releases)
 
 ### Play Store
 
-Available at [io.lakscastro.ttt](https://play.google.com/store/apps/details?id=io.lakscastro.ttt).
+Available at [io.alexrintt.ttt](https://play.google.com/store/apps/details?id=io.alexrintt.ttt).
 
-<a href="https://play.google.com/store/apps/details?id=io.lakscastro.ttt&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
+<a href="https://play.google.com/store/apps/details?id=io.alexrintt.ttt&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Get it on Google Play" src="https://user-images.githubusercontent.com/51419598/170156499-fc45733a-2701-4386-be72-f28181c87cf0.png"/></a>
 
 ## How to play
 
@@ -52,9 +52,9 @@ I wanted to know to create an app which allow P2P communication over a local net
 
 ## Screenshots
 
-|  <img src="https://user-images.githubusercontent.com/51419598/169547585-c6978057-80c3-4859-a33c-7632049e4f86.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548180-3d8e05e1-fe70-440e-be69-51118cf4abf1.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169547883-3a4e24df-6cbd-43c5-9d28-177200f87828.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548018-a26587dd-0631-4678-991b-268f52d7e90a.png" alt="Screenshot"> |
-|---|---|---|---|
-| <img src="https://user-images.githubusercontent.com/51419598/169548596-eacf86cd-1a7c-4ad9-b219-c03c9680e6fd.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548697-4dfd2d3c-15dd-4a49-a5a0-81afa5b9e093.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548758-f2ac36c5-2164-4172-a3de-4fc765989d1c.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548906-3a915f4c-288d-49b7-9123-e5ea66ad1285.png"> |
+| <img src="https://user-images.githubusercontent.com/51419598/169547585-c6978057-80c3-4859-a33c-7632049e4f86.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548180-3d8e05e1-fe70-440e-be69-51118cf4abf1.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169547883-3a4e24df-6cbd-43c5-9d28-177200f87828.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548018-a26587dd-0631-4678-991b-268f52d7e90a.png" alt="Screenshot"> |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| <img src="https://user-images.githubusercontent.com/51419598/169548596-eacf86cd-1a7c-4ad9-b219-c03c9680e6fd.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548697-4dfd2d3c-15dd-4a49-a5a0-81afa5b9e093.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548758-f2ac36c5-2164-4172-a3de-4fc765989d1c.png" alt="Screenshot"> | <img src="https://user-images.githubusercontent.com/51419598/169548906-3a915f4c-288d-49b7-9123-e5ea66ad1285.png">                  |
 
 <br /><br /><br />
 
@@ -64,7 +64,7 @@ I wanted to know to create an app which allow P2P communication over a local net
   Open Source
 </h2>
 <p align="center">
-  <sub>Copyright © 2022-present, Laks Castro.</sub>
+  <sub>Copyright © 2022-present, Alex Rintt.</sub>
 </p>
 <p align="center">Tic Tac Toe <a href="/LICENSE">is MIT licensed 💖</a></p>
 <p align="center">

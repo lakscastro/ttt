@@ -1,4 +1,4 @@
-package io.lakscastro.ttt
+package io.alexrintt.ttt
 
 import io.flutter.embedding.android.FlutterActivity
 
